@@ -221,6 +221,15 @@ h4 {
   color: var(--accent-dark);
 }
 
+.activities-list {
+  margin: 0 0 28px;
+  padding-left: 1.4em;
+}
+
+.activities-list li {
+  margin-bottom: 10px;
+}
+
 .signature {
   margin: 42px 0 0 auto;
   max-width: 410px;
@@ -488,6 +497,16 @@ h4 {
   color: var(--muted);
   background: #ffffff;
   border-top: 1px solid var(--line);
+}
+
+.footer-nav {
+  margin-bottom: 10px;
+  font-family: "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif;
+  font-size: 14px;
+}
+
+.footer-nav a {
+  color: var(--accent-dark);
 }
 
 .site-footer p {
