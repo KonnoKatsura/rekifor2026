@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rekifor2026.website/sitemap.xml
