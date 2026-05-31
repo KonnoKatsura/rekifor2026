@@ -146,6 +146,7 @@ textarea {
 
 .notice-inner {
   padding: 34px 0 38px;
+  max-width: 900px;
 }
 
 .eyebrow,
@@ -173,7 +174,7 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(30px, 4vw, 48px);
+  font-size: clamp(26px, 3.2vw, 38px);
 }
 
 h2 {
@@ -343,6 +344,27 @@ h4 {
   border-left: 5px solid var(--accent);
 }
 
+.profiles {
+  margin-top: 48px;
+  border-top: 1px solid var(--line);
+}
+
+.profiles details {
+  border-bottom: 1px solid var(--line);
+}
+
+.profiles summary {
+  padding: 18px 4px;
+  color: var(--accent-dark);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profiles p {
+  margin: 0;
+  padding: 0 4px 20px;
+}
+
 .flyer-section {
   padding: clamp(56px, 8vw, 96px) 0;
   color: #ffffff;
@@ -387,6 +409,14 @@ h4 {
 
 .contact-mail {
   font-weight: 700;
+}
+
+.venue {
+  margin-top: 30px;
+}
+
+.venue h3 {
+  margin-top: 0;
 }
 
 .contact-form {
