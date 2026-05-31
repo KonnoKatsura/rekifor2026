@@ -564,12 +564,9 @@ h4 {
     width: min(100% - 28px, 1080px);
   }
 
-  h2 {
-    text-align: left;
-  }
-
-  .section-number {
-    text-align: left;
+  .section .section-inner > .section-number,
+  .section .section-inner > .section-number + h2 {
+    text-align: center;
   }
 
   .definition-list div,
