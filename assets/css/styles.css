@@ -149,8 +149,7 @@ textarea {
   max-width: 900px;
 }
 
-.eyebrow,
-.section-number {
+.eyebrow {
   margin: 0 0 8px;
   color: var(--gold);
   font-family: "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif;
@@ -202,10 +201,6 @@ h4 {
 
 .section.alt {
   background: var(--soft);
-}
-
-.section-number {
-  text-align: center;
 }
 
 .prose {
@@ -581,11 +576,6 @@ h4 {
   .notice-inner,
   .section-inner {
     width: min(100% - 28px, 1080px);
-  }
-
-  .section .section-inner > .section-number,
-  .section .section-inner > .section-number + h2 {
-    text-align: center;
   }
 
   .definition-list div,
