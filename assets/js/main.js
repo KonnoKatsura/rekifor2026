@@ -6,8 +6,7 @@
     const icon = document.createElement("link");
     icon.id = "favicon-refresh";
     icon.rel = "icon";
-    icon.type = "image/svg+xml";
-    icon.href = "favicon.svg?v=original-20260730b";
+    icon.href = "favicon.ico?v=20260730c";
     document.head.appendChild(icon);
   }
 
