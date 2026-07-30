@@ -2,6 +2,15 @@
   const navToggle = document.querySelector(".nav-toggle");
   const siteNav = document.querySelector(".site-nav");
 
+  if (!document.querySelector("#favicon-refresh")) {
+    const icon = document.createElement("link");
+    icon.id = "favicon-refresh";
+    icon.rel = "icon";
+    icon.type = "image/svg+xml";
+    icon.href = "favicon.svg?v=original-20260730b";
+    document.head.appendChild(icon);
+  }
+
   if (navToggle && siteNav) {
     navToggle.addEventListener("click", () => {
       const isOpen = siteNav.classList.toggle("is-open");
@@ -16,20 +25,14 @@
     });
   }
 
-
   const noticeInner = document.querySelector(".notice-inner");
 
   if (noticeInner && !document.querySelector("#notice-update-style")) {
-    const style = document.createElement("style");
-    style.id = "notice-update-style";
-    style.textContent = `
-      .notice-primary { position: relative; padding: 24px 26px 26px; border: 1px solid rgba(158, 37, 37, 0.24); border-left: 5px solid #c83b35; background: #fff8f0; }
-      .notice-label { display: inline-flex; align-items: center; min-height: 28px; margin: 0 0 14px; padding: 4px 12px; border-radius: 999px; background: #c83b35; color: #ffffff; font-family: "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0; line-height: 1; text-transform: uppercase; }
-      .notice-primary h1 { margin-bottom: 18px; }
-      .notice-signature { margin-top: 18px; text-align: right; }
-      .notice-archive { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
-      .notice-archive h2 { margin-bottom: 12px; color: var(--ink); font-size: clamp(18px, 2.2vw, 24px); }`;
-    document.head.appendChild(style);
+    const link = document.createElement("link");
+    link.id = "notice-update-style";
+    link.rel = "stylesheet";
+    link.href = "assets/css/styles.css?v=notice-20260730";
+    document.head.appendChild(link);
   }
 
   if (noticeInner) {
