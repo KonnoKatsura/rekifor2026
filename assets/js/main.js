@@ -2,6 +2,15 @@
   const navToggle = document.querySelector(".nav-toggle");
   const siteNav = document.querySelector(".site-nav");
 
+  if (!document.querySelector("#favicon-refresh")) {
+    const icon = document.createElement("link");
+    icon.id = "favicon-refresh";
+    icon.rel = "icon";
+    icon.type = "image/svg+xml";
+    icon.href = "favicon.svg?v=original-20260730b";
+    document.head.appendChild(icon);
+  }
+
   if (navToggle && siteNav) {
     navToggle.addEventListener("click", () => {
       const isOpen = siteNav.classList.toggle("is-open");
