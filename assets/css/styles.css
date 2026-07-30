@@ -149,8 +149,7 @@ textarea {
   max-width: 900px;
 }
 
-.eyebrow,
-.section-number {
+.eyebrow {
   margin: 0 0 8px;
   color: var(--gold);
   font-family: "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif;
@@ -204,10 +203,6 @@ h4 {
   background: var(--soft);
 }
 
-.section-number {
-  text-align: center;
-}
-
 .prose {
   max-width: 880px;
 }
@@ -219,6 +214,15 @@ h4 {
 
 .prose strong {
   color: var(--accent-dark);
+}
+
+.activities-list {
+  margin: 0 0 28px;
+  padding-left: 1.4em;
+}
+
+.activities-list li {
+  margin-bottom: 10px;
 }
 
 .signature {
@@ -349,15 +353,23 @@ h4 {
   border-top: 1px solid var(--line);
 }
 
-.profiles details {
+.profiles article {
   border-bottom: 1px solid var(--line);
 }
 
-.profiles summary {
-  padding: 18px 4px;
+.profiles h4 {
+  margin: 0;
+  padding: 18px 4px 6px;
   color: var(--accent-dark);
   font-weight: 700;
-  cursor: pointer;
+}
+
+.profiles h4 span {
+  display: inline-block;
+  margin-left: 0.45em;
+  color: var(--muted);
+  font-size: 0.86em;
+  font-weight: 600;
 }
 
 .profiles p {
@@ -367,8 +379,8 @@ h4 {
 
 .flyer-section {
   padding: clamp(56px, 8vw, 96px) 0;
-  color: #ffffff;
-  background: #2c2418;
+  color: var(--ink);
+  background: #efe4c8;
 }
 
 .flyer-layout {
@@ -379,12 +391,12 @@ h4 {
 }
 
 .flyer-layout h2 {
-  color: #ffffff;
+  color: var(--ink);
   text-align: left;
 }
 
 .flyer-layout p {
-  color: rgba(255, 255, 255, 0.84);
+  color: var(--muted);
 }
 
 .flyer-link {
@@ -392,7 +404,7 @@ h4 {
 }
 
 .flyer-link img {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(108, 75, 103, 0.28);
   box-shadow: var(--shadow);
 }
 
@@ -490,6 +502,16 @@ h4 {
   border-top: 1px solid var(--line);
 }
 
+.footer-nav {
+  margin-bottom: 10px;
+  font-family: "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif;
+  font-size: 14px;
+}
+
+.footer-nav a {
+  color: var(--accent-dark);
+}
+
 .site-footer p {
   margin: 0;
 }
@@ -564,14 +586,6 @@ h4 {
     width: min(100% - 28px, 1080px);
   }
 
-  h2 {
-    text-align: left;
-  }
-
-  .section-number {
-    text-align: left;
-  }
-
   .definition-list div,
   .schedule article {
     grid-template-columns: 1fr;
@@ -589,4 +603,10 @@ h4 {
   .contact-form {
     padding: 20px;
   }
+}
+
+/* Temporary hide: membership guide */
+.site-nav a[href="#membership"],
+#membership {
+  display: none;
 }
