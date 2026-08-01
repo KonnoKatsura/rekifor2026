@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>会員名簿スプレッドシート 作成ガイドデモ</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #657381;
+      --line: #d6dee6;
+      --soft: #f6f3eb;
+      --paper: #fffdf8;
+      --green: #285d48;
+      --green-2: #e6f1eb;
+      --blue: #0e5aa7;
+      --blue-2: #e8f1fb;
+      --red: #c7352b;
+      --red-2: #fdebea;
+      --gold: #b4892f;
+      --gold-2: #fbf3d5;
+      --purple: #5b3f82;
+      --purple-2: #efe9f7;
+      --shadow: 0 18px 45px rgba(31, 41, 51, .12);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", Meiryo, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #fbf8ef 0%, #f7faf7 45%, #f7f8fb 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    button, select, input {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+    }
+
+    .sidebar {
+      background: rgba(255, 253, 248, .94);
+      border-right: 1px solid var(--line);
+      padding: 22px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .mark {
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(40, 93, 72, .24);
+      background:
+        radial-gradient(circle at 33% 31%, #fff 0 18%, transparent 19%),
+        conic-gradient(from 210deg, #2a5847, #2a5847 21%, #b4892f 21% 36%, #a33768 36% 54%, #0e5aa7 54% 72%, #2a5847 72%);
+      border-radius: 50%;
+    }
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.35;
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+      margin: 0 0 20px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px;
+      margin: 18px 0 22px;
+    }
+
+    .stepButton {
+      border: 1px solid transparent;
+      background: transparent;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 8px;
+      color: var(--ink);
+    }
+
+    .stepButton:hover {
+      background: #f2f6f3;
+    }
+
+    .stepButton.isActive {
+      background: var(--green-2);
+      border-color: rgba(40, 93, 72, .28);
+    }
+
+    .stepNo {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      height: 24px;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .stepTitle {
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .stepMini {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    .sideNote {
+      border: 1px solid #ead9a9;
+      background: #fff9e7;
+      border-radius: 8px;
+      padding: 12px;
+      color: #604715;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 24px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+    }
+
+    .lesson {
+      background: rgba(255, 253, 248, .96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .lesson h2 {
+      font-size: 24px;
+      margin: 0 0 8px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .lesson p {
+      color: var(--muted);
+      line-height: 1.85;
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 9px 13px;
+      cursor: pointer;
+      color: var(--ink);
+      min-height: 40px;
+    }
+
+    .btn.primary {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+      font-weight: 700;
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 16px;
+    }
+
+    .sheetShell {
+      min-width: 0;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .fakeToolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-height: 46px;
+      padding: 8px 12px;
+      background: #f8faf9;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+
+    .toolbarButton {
+      border: 1px solid #ccd6dd;
+      background: #fff;
+      border-radius: 6px;
+      padding: 6px 9px;
+      color: #40505e;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .formulaBar {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      min-height: 38px;
+    }
+
+    .cellName {
+      border-right: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .formulaText {
+      padding: 9px 12px;
+      color: #40505e;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .gridWrap {
+      overflow: auto;
+      position: relative;
+      background: #f4f7f5;
+    }
+
+    table.sheet {
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1180px;
+      width: max-content;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .sheet th,
+    .sheet td {
+      border-right: 1px solid #d8e0e6;
+      border-bottom: 1px solid #d8e0e6;
+      height: 36px;
+      padding: 6px 8px;
+      min-width: 118px;
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #fff;
+    }
+
+    .sheet .corner,
+    .sheet .colHead,
+    .sheet .rowHead {
+      background: #edf2ef;
+      color: #5f6f7d;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .sheet .rowHead {
+      min-width: 46px;
+      width: 46px;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+
+    .sheet .corner {
+      position: sticky;
+      left: 0;
+      top: 0;
+      z-index: 5;
+      min-width: 46px;
+      width: 46px;
+    }
+
+    .sheet thead .colHead {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+
+    .sheet .frozen {
+      position: sticky;
+      z-index: 4;
+      box-shadow: 2px 0 0 rgba(40, 93, 72, .35);
+    }
+
+    .sheet thead .frozen {
+      z-index: 6;
+    }
+
+    .freezeA { left: 46px; }
+    .freezeB { left: 164px; }
+    .freezeC { left: 282px; }
+
+    .sheet .headerCell {
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .sheet .masterHead {
+      background: var(--purple);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .sheet .summaryHead {
+      background: var(--gold-2);
+      color: #4a3b16;
+      font-weight: 700;
+    }
+
+    .highlight {
+      outline: 3px solid #f0b429;
+      outline-offset: -3px;
+      box-shadow: inset 0 0 0 2px #fff;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 3px 10px;
+      min-width: 64px;
+      justify-content: space-between;
+      border: 1px solid rgba(31, 41, 51, .18);
+      font-weight: 700;
+      color: #111;
+    }
+
+    .chip::after {
+      content: "▼";
+      font-size: 9px;
+      opacity: .7;
+    }
+
+    .chip.blue { background: #8cc3ff; }
+    .chip.red { background: #ff9b95; }
+    .chip.green { background: #93d3a4; }
+    .chip.yellow { background: #ffe08a; }
+    .chip.purple { background: #cab7ef; }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 8px;
+      border-top: 1px solid var(--line);
+      background: #f8faf9;
+      overflow-x: auto;
+    }
+
+    .tab {
+      border: 1px solid #cad5dc;
+      background: #fff;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      color: #384956;
+      font-size: 13px;
+    }
+
+    .tab.isActive {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+      font-weight: 700;
+    }
+
+    .panel {
+      background: rgba(255, 253, 248, .96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      min-width: 0;
+      overflow: auto;
+    }
+
+    .panel h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    .panel p,
+    .panel li {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    .panel ul {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+
+    .practice {
+      border-top: 1px solid var(--line);
+      margin-top: 14px;
+      padding-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .practice label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: #40505e;
+      font-weight: 700;
+    }
+
+    .practice select,
+    .practice input {
+      border: 1px solid #cbd5dc;
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--ink);
+      min-width: 0;
+    }
+
+    .callout {
+      border: 1px solid #d9c58f;
+      background: #fff9e6;
+      border-radius: 8px;
+      padding: 12px;
+      color: #604715;
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .formula {
+      background: #f3f6f8;
+      border: 1px solid #d8e0e6;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow: auto;
+      color: #263745;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: var(--green);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: .2s ease;
+      z-index: 10;
+    }
+
+    .toast.isOpen {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+
+      .workspace,
+      .lesson {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <h1>会員名簿スプシ<br>作成ガイドデモ</h1>
+      </div>
+      <p class="lead">Google Sheetsを使ったことが少ない人でも、設定マスタ、入力用タブ、プルダウン、集計タブの関係を画面上で練習できます。</p>
+      <div class="steps" id="steps"></div>
+      <div class="sideNote">
+        このデモは練習用です。実名、住所、メールアドレスは使っていません。実際のスプレッドシートを壊さず、考え方だけ学ぶための画面です。
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="lesson" aria-live="polite">
+        <div>
+          <h2 id="lessonTitle"></h2>
+          <p id="lessonBody"></p>
+        </div>
+        <div class="controls">
+          <button class="btn" id="prevBtn" type="button">戻る</button>
+          <button class="btn primary" id="nextBtn" type="button">次へ</button>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="sheetShell">
+          <div class="fakeToolbar">
+            <button class="toolbarButton" type="button">ファイル</button>
+            <button class="toolbarButton" type="button">編集</button>
+            <button class="toolbarButton" type="button">表示</button>
+            <button class="toolbarButton" type="button">挿入</button>
+            <button class="toolbarButton" type="button">データ</button>
+            <button class="toolbarButton" type="button">固定</button>
+            <button class="toolbarButton" type="button">入力規則</button>
+          </div>
+          <div class="formulaBar">
+            <div class="cellName" id="cellName">A1</div>
+            <div class="formulaText" id="formulaText"></div>
+          </div>
+          <div class="gridWrap" id="gridWrap">
+            <table class="sheet" id="sheetTable"></table>
+          </div>
+          <div class="tabs" id="tabs"></div>
+        </div>
+
+        <aside class="panel">
+          <h3 id="panelTitle"></h3>
+          <div id="panelBody"></div>
+          <div class="practice" id="practice"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const columns = ["A","B","C","D","E","F","G","H","I"];
+    const tabs = ["会員入力用", "設定マスタ", "会員種別別", "連絡管理", "未納者確認"];
+    let currentStep = 0;
+    let activeTab = "会員入力用";
+    let selectedType = "正会員";
+    let selectedPayment = "未";
+    let selectedNotice = "送信予定";
+    let addedRowName = "";
+
+    const memberRows = [
+      ["2026/08/01", "正会員", "サンプル 太郎", "サンプル タロウ", "sample@example.com", "済", "済", "不要", "済"],
+      ["2026/08/02", "オンライン, 正会員", "見本 花子", "ミホン ハナコ", "mihon@example.com", "未", "未", "送信予定", "未"],
+      ["2026/08/03", "随時（ビジター）", "練習 一郎", "レンシュウ イチロウ", "lesson@example.com", "不要", "不要", "不要", "済"],
+      ["", "正会員", "", "", "", "未", "未", "送信予定", "未"]
+    ];
+
+    const masterRows = [
+      ["会員種別", "会費入金", "メール対応"],
+      ["正会員", "済", "済"],
+      ["オンライン, 正会員", "未", "未"],
+      ["随時（ビジター）", "不要", "不要"],
+      ["お試し, 随時（ビジター）", "確認中", "失敗"],
+      ["理事", "", "送信予定"],
+      ["評議員", "", "再送予定"],
+      ["賛助会員", "", ""]
+    ];
+
+    const steps = [
+      {
+        title: "全体像をつかむ",
+        mini: "入力用、設定マスタ、確認用タブの役割",
+        tab: "会員入力用",
+        highlight: ["tab:会員入力用", "tab:設定マスタ", "tab:会員種別別"],
+        body: "まず、名簿を1枚の表だけで頑張らないのがコツです。入力する場所、選択肢を置く場所、集計を見る場所を分けます。",
+        panel: {
+          title: "作るものの地図",
+          html: `
+            <ul>
+              <li><b>会員入力用</b>: 日常的に入力するメイン表</li>
+              <li><b>設定マスタ</b>: プルダウン候補を置く場所</li>
+              <li><b>会員種別別</b>: 種別ごとの人数を見る場所</li>
+              <li><b>連絡管理</b>: 告知やメール送信状況を見る場所</li>
+            </ul>
+            <div class="callout">入力と確認を分けると、表が少しデータベースっぽく使えるようになります。</div>
+          `
+        }
+      },
+      {
+        title: "入力用タブを作る",
+        mini: "まずは1行目に見出しを作る",
+        tab: "会員入力用",
+        highlight: ["row:1", "cell:B1", "cell:F1", "cell:I1"],
+        body: "1行目には列の名前を入れます。あとでプルダウンや集計を作るため、この見出し名がとても大事です。",
+        formula: "見出し例: 受付日 / 会員種別 / お名前 / フリガナ / メールアドレス / 会費入金 / 口座メール済 / 督促 / 8月告知",
+        panel: {
+          title: "見出しを先に決める",
+          html: `
+            <p>見出しは、後で数式や確認用タブから参照されます。</p>
+            <ul>
+              <li>同じ名前の見出しを複数作らない</li>
+              <li>あとから変えすぎない</li>
+              <li>月別の連絡履歴は「8月告知」のように意味がわかる名前にする</li>
+            </ul>
+          `
+        }
+      },
+      {
+        title: "設定マスタを作る",
+        mini: "プルダウン候補を別タブに置く",
+        tab: "設定マスタ",
+        highlight: ["col:A", "col:B", "col:C"],
+        body: "プルダウンの候補を入力用タブに直接散らばらせず、設定マスタにまとめておきます。",
+        formula: "設定マスタ!A列 = 会員種別候補 / B列 = 会費候補 / C列 = メール対応候補",
+        panel: {
+          title: "設定マスタの意味",
+          html: `
+            <p>設定マスタは、表の裏側にある選択肢リストです。</p>
+            <div class="callout">プルダウン候補を一箇所に置くと、後で「選択肢を増やしたい」となった時に管理しやすくなります。</div>
+          `
+        }
+      },
+      {
+        title: "会員種別をプルダウンにする",
+        mini: "設定マスタの候補を入力用タブへ反映",
+        tab: "会員入力用",
+        highlight: ["col:B", "cell:B2", "cell:B3"],
+        body: "会員種別列に、設定マスタの候補を使ったプルダウンを設定します。",
+        formula: "データ → データの入力規則 → 範囲: 設定マスタ!A2:A",
+        panel: {
+          title: "ここが今日の山場",
+          html: `
+            <p>設定マスタに候補を置き、入力用タブの列へ反映します。</p>
+            <ul>
+              <li>候補は設定マスタで管理</li>
+              <li>入力用タブでは選ぶだけ</li>
+              <li>手入力ゆれを減らせる</li>
+            </ul>
+          `
+        },
+        practice: "type"
+      },
+      {
+        title: "会費や告知もプルダウンにする",
+        mini: "済・未・不要などを選択式にする",
+        tab: "会員入力用",
+        highlight: ["col:F", "col:G", "col:H", "col:I"],
+        body: "会費やメール対応は、自由入力ではなく決まった候補から選ぶ形にします。",
+        formula: "会費入金: 設定マスタ!B2:B / メール対応: 設定マスタ!C2:C",
+        panel: {
+          title: "入力ゆれを防ぐ",
+          html: `
+            <p>「済」「済み」「送信済み」が混ざると、後で集計できなくなります。</p>
+            <div class="callout">プルダウンにすると、集計しやすいきれいな表になります。</div>
+          `
+        },
+        practice: "statuses"
+      },
+      {
+        title: "色で見分けやすくする",
+        mini: "条件付き書式で状態を色分け",
+        tab: "会員入力用",
+        highlight: ["cell:F2", "cell:F3", "cell:I3"],
+        body: "プルダウンだけだと見落としやすいので、状態に応じてセルの色を変えます。",
+        formula: "条件付き書式: セルの値が「済」なら青、「未」なら赤、「不要」なら緑",
+        panel: {
+          title: "色は補助輪",
+          html: `
+            <p>色だけに頼らず、文字も必ず残します。</p>
+            <ul>
+              <li>済: 青</li>
+              <li>未: 赤</li>
+              <li>不要: 緑</li>
+              <li>送信予定: 紫</li>
+            </ul>
+          `
+        }
+      },
+      {
+        title: "会員種別別タブを作る",
+        mini: "入力用タブから自動で一覧を作る",
+        tab: "会員種別別",
+        highlight: ["cell:A1", "cell:A6", "cell:B7"],
+        body: "確認用タブには直接入力せず、入力用タブから自動表示する式を入れます。",
+        formula: "=SORT(FILTER({'会員入力用'!B2:B,'会員入力用'!C2:C,'会員入力用'!D2:D},LEN('会員入力用'!C2:C)),1,TRUE,3,TRUE)",
+        panel: {
+          title: "FILTERとSORTの役割",
+          html: `
+            <ul>
+              <li><b>FILTER</b>: 名前が入っている行だけ抜き出す</li>
+              <li><b>SORT</b>: 会員種別順、フリガナ順に並べる</li>
+            </ul>
+            <div class="callout">確認用タブは、入力用タブの鏡のようなものです。</div>
+          `
+        }
+      },
+      {
+        title: "人数を数える",
+        mini: "種別ごとの人数と合計を出す",
+        tab: "会員種別別",
+        highlight: ["cell:A6", "cell:B7", "cell:C7"],
+        body: "種別ごとの人数はCOUNTIF、合計はCOUNTAの考え方で出します。",
+        formula: "COUNTIF = 条件に合う数を数える / COUNTA = 空白ではない名前を数える",
+        panel: {
+          title: "集計の考え方",
+          html: `
+            <p>会員種別の一覧を作り、それぞれ何人いるかを数えます。</p>
+            <ul>
+              <li>正会員が何人か</li>
+              <li>オンライン正会員が何人か</li>
+              <li>会員さん合計が何人か</li>
+            </ul>
+          `
+        }
+      },
+      {
+        title: "役職系を別枠にする",
+        mini: "理事・評議員・賛助会員を上に分ける",
+        tab: "会員種別別",
+        highlight: ["cell:A1", "cell:A2", "cell:A6"],
+        body: "人数が大きく変わらない役職系は、通常の会員さん集計から分けると見やすくなります。",
+        formula: "REGEXMATCHで「理事|評議員|賛助会員」を含む行を判定",
+        panel: {
+          title: "役職系を分ける理由",
+          html: `
+            <p>通常の会員さん人数と役職・固定枠が混ざると、運営上の数字がわかりにくくなります。</p>
+            <div class="callout">上に役職系、下に会員さん集計。この分け方にすると確認が楽になります。</div>
+          `
+        }
+      },
+      {
+        title: "連絡管理タブを作る",
+        mini: "告知やURL送信状況だけを見る",
+        tab: "連絡管理",
+        highlight: ["row:1", "col:E", "col:I"],
+        body: "入力用タブから、メールや告知に必要な列だけを抜き出して表示します。",
+        formula: "入力用タブの会員種別・名前・メール・4月URL・6月告知・8月告知などを表示",
+        panel: {
+          title: "目的別の確認タブ",
+          html: `
+            <p>全部の列を毎回見る必要はありません。連絡作業用には、連絡に必要な列だけを表示します。</p>
+            <ul>
+              <li>メールアドレス</li>
+              <li>告知済みか</li>
+              <li>再送が必要か</li>
+            </ul>
+          `
+        }
+      },
+      {
+        title: "固定で見間違いを防ぐ",
+        mini: "右スクロールしても名前を残す",
+        tab: "会員入力用",
+        highlight: ["col:A", "col:B", "col:C", "col:D"],
+        body: "右側の告知列を見ている時に、誰の行かわからなくならないよう、左側の列を固定します。",
+        formula: "表示 → 固定 → 4列",
+        panel: {
+          title: "固定の感覚",
+          html: `
+            <p>固定線の右側だけが横スクロールします。</p>
+            <div class="callout">名簿では、名前を固定しておくと入力ミスがかなり減ります。</div>
+          `
+        }
+      },
+      {
+        title: "#REF!を理解する",
+        mini: "数式が広がれない時のエラー",
+        tab: "連絡管理",
+        highlight: ["cell:B1", "cell:A1"],
+        body: "確認用タブの式は、右や下へ自動で広がります。その先に文字があると#REF!になります。",
+        formula: "#REF! = 数式の結果を広げたいのに、広げる先に何かある",
+        panel: {
+          title: "壊れたのではなく詰まっている",
+          html: `
+            <p>表示用タブに直接文字を入れると、数式が展開できなくなります。</p>
+            <ul>
+              <li>表示用タブには直接入力しない</li>
+              <li>入力は会員入力用へ戻る</li>
+              <li>見出し変更は慎重にする</li>
+            </ul>
+          `
+        }
+      }
+    ];
+
+    function chip(value) {
+      const map = {
+        "済": "blue",
+        "未": "red",
+        "不要": "green",
+        "確認中": "yellow",
+        "送信予定": "purple",
+        "再送予定": "purple",
+        "失敗": "red"
+      };
+      if (!map[value]) return escapeHtml(value);
+      return `<span class="chip ${map[value]}">${escapeHtml(value)}</span>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function cellKey(row, col) {
+      return `cell:${columns[col - 1]}${row}`;
+    }
+
+    function shouldHighlight(row, col, value) {
+      const step = steps[currentStep];
+      if (!step.highlight) return false;
+      const colName = columns[col - 1];
+      return step.highlight.includes(cellKey(row, col)) ||
+        step.highlight.includes(`row:${row}`) ||
+        step.highlight.includes(`col:${colName}`) ||
+        step.highlight.includes(`tab:${value}`);
+    }
+
+    function dataForTab(tab) {
+      if (tab === "設定マスタ") {
+        return masterRows;
+      }
+
+      if (tab === "会員種別別") {
+        const normalRows = rowsWithPractice().filter((row) => row[2] && !/理事|評議員|賛助会員/.test(row[1]));
+        const counts = {};
+        normalRows.forEach((row) => { counts[row[1]] = (counts[row[1]] || 0) + 1; });
+        return [
+          ["役職・固定枠", "", ""],
+          ["会員種別", "お名前", "フリガナ"],
+          ["理事", "役職 サンプル", ""],
+          ["評議員", "評議員 サンプル", ""],
+          ["賛助会員", "賛助 サンプル", ""],
+          ["会員さん集計", "", ""],
+          ["会員種別", "人数", "会員さん合計"],
+          ...Object.keys(counts).sort().map((type, index) => [type, String(counts[type]), index === 0 ? String(normalRows.length) : ""]),
+          ["", "", ""],
+          ["会員さん一覧（種別別）", "", ""],
+          ["会員種別", "お名前", "フリガナ"],
+          ...normalRows.sort((a, b) => `${a[1]}${a[3]}`.localeCompare(`${b[1]}${b[3]}`, "ja")).map((row) => [row[1], row[2], row[3]])
+        ];
+      }
+
+      if (tab === "連絡管理") {
+        return [
+          ["会員種別", "お名前", "メールアドレス", "4月 URL送信", "6月告知", "8月告知"],
+          ...rowsWithPractice().filter((row) => row[2]).map((row) => [row[1], row[2], row[4], "不要", row[6], row[8]])
+        ];
+      }
+
+      if (tab === "未納者確認") {
+        return [
+          ["会員種別", "お名前", "会費入金", "督促"],
+          ...rowsWithPractice().filter((row) => row[2] && row[5] === "未").map((row) => [row[1], row[2], row[5], row[7]])
+        ];
+      }
+
+      return [
+        ["受付日", "会員種別", "お名前", "フリガナ", "メールアドレス", "会費入金", "口座メール済", "督促", "8月告知"],
+        ...rowsWithPractice()
+      ];
+    }
+
+    function rowsWithPractice() {
+      const rows = memberRows.map((row) => [...row]);
+      rows[1][1] = selectedType;
+      rows[1][5] = selectedPayment;
+      rows[1][8] = selectedNotice;
+      if (addedRowName.trim()) {
+        rows[3] = ["2026/08/10", selectedType, addedRowName.trim(), "ツイカ サンプル", "new@example.com", selectedPayment, "未", "送信予定", selectedNotice];
+      }
+      return rows;
+    }
+
+    function renderSteps() {
+      const root = document.querySelector("#steps");
+      root.innerHTML = steps.map((step, index) => `
+        <button class="stepButton ${index === currentStep ? "isActive" : ""}" type="button" data-step="${index}">
+          <span class="stepNo">${index + 1}</span>
+          <span>
+            <span class="stepTitle">${escapeHtml(step.title)}</span>
+            <span class="stepMini">${escapeHtml(step.mini)}</span>
+          </span>
+        </button>
+      `).join("");
+      root.querySelectorAll("[data-step]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentStep = Number(button.dataset.step);
+          activeTab = steps[currentStep].tab;
+          render();
+        });
+      });
+    }
+
+    function renderTabs() {
+      const root = document.querySelector("#tabs");
+      root.innerHTML = tabs.map((tab) => `
+        <button class="tab ${tab === activeTab ? "isActive" : ""} ${shouldHighlight(0, 0, `tab:${tab}`) ? "highlight" : ""}" type="button" data-tab="${escapeHtml(tab)}">${escapeHtml(tab)}</button>
+      `).join("");
+      root.querySelectorAll("[data-tab]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeTab = button.dataset.tab;
+          render();
+        });
+      });
+    }
+
+    function renderSheet() {
+      const data = dataForTab(activeTab);
+      const table = document.querySelector("#sheetTable");
+      const maxCols = Math.max(9, ...data.map((row) => row.length));
+      const colHeads = Array.from({ length: maxCols }, (_, index) => columns[index] || String(index + 1));
+      const bodyRows = Array.from({ length: Math.max(14, data.length) }, (_, index) => data[index] || []);
+
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th class="corner"></th>
+            ${colHeads.map((name, index) => `<th class="colHead ${index < 4 && activeTab === "会員入力用" ? `frozen freeze${name}` : ""} ${shouldHighlight(0, index + 1, "") ? "highlight" : ""}">${escapeHtml(name)}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${bodyRows.map((row, rowIndex) => `
+            <tr>
+              <th class="rowHead">${rowIndex + 1}</th>
+              ${colHeads.map((_, colIndex) => {
+                const value = row[colIndex] || "";
+                const isHeader = rowIndex === 0 || (activeTab !== "会員入力用" && /固定枠|集計|一覧/.test(row[0] || ""));
+                const isSubHeader = activeTab !== "会員入力用" && (rowIndex === 1 || rowIndex === 6 || rowIndex === 11);
+                const frozenClass = colIndex < 4 && activeTab === "会員入力用" ? `frozen freeze${columns[colIndex]}` : "";
+                const headerClass = activeTab === "設定マスタ" && rowIndex === 0 ? "masterHead" : isHeader ? "headerCell" : isSubHeader ? "summaryHead" : "";
+                const content = ["会費入金", "口座メール済", "督促", "8月告知"].includes(data[0]?.[colIndex]) && rowIndex > 0 ? chip(value) : escapeHtml(value);
+                return `<td class="${frozenClass} ${headerClass} ${shouldHighlight(rowIndex + 1, colIndex + 1, value) ? "highlight" : ""}">${content}</td>`;
+              }).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+    }
+
+    function renderLesson() {
+      const step = steps[currentStep];
+      document.querySelector("#lessonTitle").textContent = step.title;
+      document.querySelector("#lessonBody").textContent = step.body;
+      document.querySelector("#formulaText").textContent = step.formula || "";
+      document.querySelector("#cellName").textContent = step.highlight?.find((item) => item.startsWith("cell:"))?.replace("cell:", "") || "A1";
+      document.querySelector("#prevBtn").disabled = currentStep === 0;
+      document.querySelector("#nextBtn").textContent = currentStep === steps.length - 1 ? "最初へ" : "次へ";
+    }
+
+    function renderPanel() {
+      const step = steps[currentStep];
+      document.querySelector("#panelTitle").textContent = step.panel.title;
+      document.querySelector("#panelBody").innerHTML = `
+        ${step.panel.html}
+        ${step.formula ? `<div class="formula">${escapeHtml(step.formula)}</div>` : ""}
+      `;
+
+      const practice = document.querySelector("#practice");
+      if (step.practice === "type") {
+        practice.innerHTML = `
+          <label>練習: 2行目の会員種別を変える
+            <select id="typeSelect">
+              ${masterRows.slice(1).map((row) => `<option ${row[0] === selectedType ? "selected" : ""}>${escapeHtml(row[0])}</option>`).join("")}
+            </select>
+          </label>
+          <label>練習: 新しい会員名を入れる
+            <input id="nameInput" value="${escapeHtml(addedRowName)}" placeholder="追加 サンプル">
+          </label>
+          <button class="btn primary" id="applyPractice" type="button">表に反映</button>
+        `;
+        practice.querySelector("#applyPractice").addEventListener("click", () => {
+          selectedType = practice.querySelector("#typeSelect").value;
+          addedRowName = practice.querySelector("#nameInput").value;
+          toast("入力用タブと集計タブに反映されました");
+          render();
+        });
+        return;
+      }
+
+      if (step.practice === "statuses") {
+        practice.innerHTML = `
+          <label>練習: 会費入金を選ぶ
+            <select id="paymentSelect">
+              ${["済", "未", "不要", "確認中"].map((value) => `<option ${value === selectedPayment ? "selected" : ""}>${value}</option>`).join("")}
+            </select>
+          </label>
+          <label>練習: 8月告知を選ぶ
+            <select id="noticeSelect">
+              ${["済", "未", "不要", "送信予定", "再送予定", "失敗"].map((value) => `<option ${value === selectedNotice ? "selected" : ""}>${value}</option>`).join("")}
+            </select>
+          </label>
+          <button class="btn primary" id="applyStatus" type="button">色付きで反映</button>
+        `;
+        practice.querySelector("#applyStatus").addEventListener("click", () => {
+          selectedPayment = practice.querySelector("#paymentSelect").value;
+          selectedNotice = practice.querySelector("#noticeSelect").value;
+          toast("プルダウン状態と色が変わりました");
+          render();
+        });
+        return;
+      }
+
+      practice.innerHTML = `
+        <button class="btn primary" type="button" id="tryStep">このステップを確認</button>
+      `;
+      practice.querySelector("#tryStep").addEventListener("click", () => toast("黄色の枠を見ながら確認してください"));
+    }
+
+    function toast(message) {
+      const node = document.querySelector("#toast");
+      node.textContent = message;
+      node.classList.add("isOpen");
+      window.setTimeout(() => node.classList.remove("isOpen"), 1800);
+    }
+
+    function render() {
+      renderSteps();
+      renderTabs();
+      renderSheet();
+      renderLesson();
+      renderPanel();
+    }
+
+    document.querySelector("#prevBtn").addEventListener("click", () => {
+      currentStep = Math.max(0, currentStep - 1);
+      activeTab = steps[currentStep].tab;
+      render();
+    });
+
+    document.querySelector("#nextBtn").addEventListener("click", () => {
+      currentStep = currentStep === steps.length - 1 ? 0 : currentStep + 1;
+      activeTab = steps[currentStep].tab;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
