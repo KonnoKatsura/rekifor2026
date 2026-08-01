@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>会員名簿スプレッドシート 実操作レシピデモ</title>
+  <style>
+    :root {
+      --ink: #24303a;
+      --muted: #64727f;
+      --line: #d5dee7;
+      --paper: #fffdf8;
+      --sheet: #ffffff;
+      --soft: #f6f8fa;
+      --green: #255b48;
+      --green-soft: #e6f2ec;
+      --blue: #0e5aa7;
+      --blue-soft: #e8f2ff;
+      --gold: #b4892f;
+      --gold-soft: #fff6d9;
+      --red: #c7352b;
+      --red-soft: #fdebea;
+      --purple: #5b3f82;
+      --purple-soft: #f1eaf8;
+      --shadow: 0 18px 42px rgba(36, 48, 58, .12);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", Meiryo, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #fbf8ef;
+      min-height: 100vh;
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+    }
+
+    .side {
+      background: rgba(255, 253, 248, .96);
+      border-right: 1px solid var(--line);
+      padding: 22px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .side h1 {
+      font-size: 21px;
+      line-height: 1.35;
+      margin: 0 0 10px;
+      letter-spacing: 0;
+    }
+
+    .side p {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+      margin: 0 0 18px;
+    }
+
+    .recipeList {
+      display: grid;
+      gap: 8px;
+    }
+
+    .recipeButton {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 9px;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .recipeButton:hover { background: #f3f7f4; }
+    .recipeButton.isActive {
+      border-color: rgba(37, 91, 72, .24);
+      background: var(--green-soft);
+    }
+
+    .recipeNo {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .recipeTitle {
+      display: block;
+      font-weight: 800;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .recipeSub {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      margin-top: 2px;
+    }
+
+    .note {
+      margin-top: 16px;
+      border: 1px solid #e5cf96;
+      background: var(--gold-soft);
+      border-radius: 8px;
+      padding: 12px;
+      color: #664d14;
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
+    }
+
+    .lesson {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .lesson h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .lesson p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 9px 13px;
+      cursor: pointer;
+      color: var(--ink);
+    }
+
+    .btn.primary {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
+    .work {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 14px;
+    }
+
+    .sheetApp {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+    }
+
+    .menuBar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+      overflow-x: auto;
+    }
+
+    .menuBtn {
+      border: 1px solid #cdd8e2;
+      background: #fff;
+      border-radius: 7px;
+      padding: 8px 12px;
+      min-width: 58px;
+      text-align: center;
+      color: #304454;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .menuBtn.isHot,
+    .formulaBox.isHot,
+    .tab.isHot,
+    .cell.isHot,
+    .colHead.isHot {
+      outline: 3px solid #f1b83d;
+      outline-offset: -3px;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 5px rgba(241, 184, 61, .26);
+      z-index: 20;
+    }
+
+    .dropdownMenu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 230px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      z-index: 30;
+      display: none;
+      text-align: left;
+    }
+
+    .dropdownMenu.isOpen { display: block; }
+
+    .dropdownItem {
+      padding: 8px 9px;
+      border-radius: 6px;
+      color: #304454;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .dropdownItem.isTarget {
+      background: var(--gold-soft);
+      font-weight: 800;
+      color: #65490e;
+    }
+
+    .subToolbar {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      min-height: 42px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .nameBox {
+      display: grid;
+      place-items: center;
+      border-right: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .formulaBox {
+      padding: 9px 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      color: #334756;
+    }
+
+    .grid {
+      overflow: auto;
+      background: #f4f7f5;
+      position: relative;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #fff;
+      min-width: 1080px;
+      width: max-content;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-right: 1px solid #d9e1e8;
+      border-bottom: 1px solid #d9e1e8;
+      min-width: 120px;
+      max-width: 180px;
+      height: 36px;
+      padding: 6px 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #fff;
+    }
+
+    .corner,
+    .rowHead,
+    .colHead {
+      background: #edf2ef;
+      color: #5a6875;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .rowHead,
+    .corner {
+      min-width: 44px;
+      width: 44px;
+      position: sticky;
+      left: 0;
+      z-index: 3;
+    }
+
+    .corner {
+      z-index: 6;
+      top: 0;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+
+    .headerCell {
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .masterHead {
+      background: var(--purple);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .resultHead {
+      background: var(--green-soft);
+      font-weight: 800;
+      color: #163d2f;
+    }
+
+    .chip {
+      border-radius: 999px;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 68px;
+      padding: 3px 10px;
+      border: 1px solid rgba(36, 48, 58, .2);
+      font-weight: 800;
+      color: #111;
+    }
+
+    .chip::after {
+      content: "▼";
+      font-size: 9px;
+      color: rgba(0, 0, 0, .65);
+    }
+
+    .blue { background: #8fc6ff; }
+    .red { background: #ffaaa3; }
+    .green { background: #98d7a7; }
+    .yellow { background: #ffe18d; }
+    .purple { background: #cab7ef; }
+
+    .tabs {
+      display: flex;
+      gap: 5px;
+      padding: 8px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+      overflow-x: auto;
+    }
+
+    .tab {
+      border: 1px solid #cad6df;
+      border-radius: 8px;
+      background: #fff;
+      color: #304454;
+      padding: 7px 12px;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+      font-weight: 800;
+    }
+
+    .guide {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      padding: 16px;
+      min-width: 0;
+      overflow: auto;
+    }
+
+    .guide h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    .guide p,
+    .guide li {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    .guide ol,
+    .guide ul {
+      padding-left: 20px;
+      margin: 8px 0 12px;
+    }
+
+    .code {
+      border: 1px solid #ccd8e2;
+      background: #f6f8fa;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #263745;
+      font-size: 12px;
+      line-height: 1.65;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .copyRow {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .copyRow textarea {
+      border: 1px solid #ccd8e2;
+      background: #fff;
+      border-radius: 8px;
+      min-height: 74px;
+      padding: 10px;
+      resize: vertical;
+      color: #263745;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .callout {
+      border: 1px solid #dec892;
+      background: var(--gold-soft);
+      color: #604816;
+      border-radius: 8px;
+      padding: 11px;
+      line-height: 1.7;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--green);
+      color: #fff;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: .2s ease;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1000px) {
+      .page,
+      .work,
+      .lesson {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        position: static;
+        height: auto;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <aside class="side">
+      <h1>会員名簿スプシ<br>実操作レシピデモ</h1>
+      <p>「データをクリック」「入力規則を選ぶ」「この式を貼る」まで、実際の画面操作に寄せた練習用デモです。</p>
+      <div class="recipeList" id="recipeList"></div>
+      <div class="note">このデモは架空データです。実際のスプレッドシートでは、まずコピーで練習してから本番に反映するのが安全です。</div>
+    </aside>
+
+    <main class="main">
+      <section class="lesson">
+        <div>
+          <h2 id="title"></h2>
+          <p id="summary"></p>
+        </div>
+        <div class="nav">
+          <button class="btn" id="prev" type="button">戻る</button>
+          <button class="btn primary" id="next" type="button">次へ</button>
+        </div>
+      </section>
+
+      <section class="work">
+        <div class="sheetApp">
+          <div class="menuBar" id="menuBar">
+            <button class="menuBtn" data-menu="ファイル" type="button">ファイル</button>
+            <button class="menuBtn" data-menu="編集" type="button">編集</button>
+            <button class="menuBtn" data-menu="表示" type="button">表示</button>
+            <button class="menuBtn" data-menu="挿入" type="button">挿入</button>
+            <button class="menuBtn" data-menu="データ" type="button">データ
+              <span class="dropdownMenu" id="dataDropdown">
+                <span class="dropdownItem">並べ替え</span>
+                <span class="dropdownItem">フィルタを作成</span>
+                <span class="dropdownItem isTarget">データの入力規則 <span>ここ</span></span>
+                <span class="dropdownItem">名前付き範囲</span>
+              </span>
+            </button>
+            <button class="menuBtn" data-menu="固定" type="button">固定
+              <span class="dropdownMenu" id="freezeDropdown">
+                <span class="dropdownItem">行なし</span>
+                <span class="dropdownItem">1行</span>
+                <span class="dropdownItem isTarget">4列 <span>ここ</span></span>
+              </span>
+            </button>
+            <button class="menuBtn" data-menu="入力規則" type="button">入力規則</button>
+          </div>
+
+          <div class="subToolbar">
+            <div class="nameBox" id="cellName">B2</div>
+            <div class="formulaBox" id="formulaBox"></div>
+          </div>
+
+          <div class="grid">
+            <table id="sheet"></table>
+          </div>
+
+          <div class="tabs" id="tabs"></div>
+        </div>
+
+        <aside class="guide">
+          <h3 id="guideTitle"></h3>
+          <div id="guideBody"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">コピーしました</div>
+
+  <script>
+    const tabs = ["会員入力用", "設定マスタ", "会員種別別", "連絡管理", "未納者確認"];
+    const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+    let activeRecipe = 0;
+    let activeTab = "会員入力用";
+
+    const recipes = [
+      {
+        title: "1. 新しいスプシを作る",
+        sub: "空の表から始める",
+        tab: "会員入力用",
+        hot: ["menu:ファイル", "tab:会員入力用"],
+        cell: "A1",
+        formula: "",
+        summary: "まず空のスプレッドシートを作り、入力用タブの名前を決めます。",
+        guide: {
+          title: "操作",
+          body: `
+            <ol>
+              <li>Google Driveで「新規」をクリック</li>
+              <li>Googleスプレッドシートを選ぶ</li>
+              <li>左下のタブ名を「会員入力用」に変更する</li>
+            </ol>
+            <div class="callout">最初にタブ名を決めておくと、あとで式を書く時に迷いません。</div>
+          `
+        }
+      },
+      {
+        title: "2. 見出しを入れる",
+        sub: "1行目に列名を作る",
+        tab: "会員入力用",
+        hot: ["row:1", "cell:A1", "cell:I1"],
+        cell: "A1",
+        formula: "受付日 / 会員種別 / お名前 / フリガナ / メールアドレス / 会費入金 / 口座メール済 / 督促 / 8月告知",
+        summary: "1行目に見出しを入れます。ここが表の骨組みです。",
+        guide: {
+          title: "入力する見出し",
+          body: `
+            <p>1行目にこの順番で入れます。</p>
+            <div class="copyRow">
+              <textarea readonly>受付日	会員種別	お名前	フリガナ	メールアドレス	会費入金	口座メール済	督促	8月告知</textarea>
+              <button class="btn primary" data-copy="受付日	会員種別	お名前	フリガナ	メールアドレス	会費入金	口座メール済	督促	8月告知" type="button">見出しをコピー</button>
+            </div>
+            <div class="callout">このままA1に貼ると、横方向に見出しが入ります。</div>
+          `
+        }
+      },
+      {
+        title: "3. 設定マスタを作る",
+        sub: "選択肢だけを置くタブ",
+        tab: "設定マスタ",
+        hot: ["tab:設定マスタ", "col:A", "col:B", "col:C"],
+        cell: "A1",
+        formula: "会員種別 / 会費入金 / メール対応",
+        summary: "プルダウン候補を別タブにまとめます。",
+        guide: {
+          title: "設定マスタに貼る内容",
+          body: `
+            <p>設定マスタのA1から貼ります。</p>
+            <div class="copyRow">
+              <textarea readonly>会員種別	会費入金	メール対応
+正会員	済	済
+オンライン, 正会員	未	未
+随時（ビジター）	不要	不要
+お試し, 随時（ビジター）	確認中	失敗
+理事		送信予定
+評議員		再送予定
+賛助会員		</textarea>
+              <button class="btn primary" data-copy="会員種別	会費入金	メール対応
+正会員	済	済
+オンライン, 正会員	未	未
+随時（ビジター）	不要	不要
+お試し, 随時（ビジター）	確認中	失敗
+理事		送信予定
+評議員		再送予定
+賛助会員		" type="button">設定マスタをコピー</button>
+            </div>
+            <div class="callout">ここが「プルダウン候補の倉庫」です。</div>
+          `
+        }
+      },
+      {
+        title: "4. 会員種別を入力規則にする",
+        sub: "データ → データの入力規則",
+        tab: "会員入力用",
+        hot: ["menu:データ", "cell:B2", "col:B"],
+        dropdown: "data",
+        cell: "B2",
+        formula: "範囲に適用: B2:B / 条件: プルダウン範囲 / 候補: 設定マスタ!A2:A",
+        summary: "会員種別列に、設定マスタの候補から選べるプルダウンを設定します。",
+        guide: {
+          title: "クリックする場所",
+          body: `
+            <ol>
+              <li>会員入力用のB列、またはB2:Bを選択</li>
+              <li>上メニューの「データ」をクリック</li>
+              <li>「データの入力規則」を選ぶ</li>
+              <li>候補範囲に <code>設定マスタ!A2:A</code> を指定</li>
+            </ol>
+            <div class="code">範囲に適用: B2:B
+条件: プルダウン範囲
+候補範囲: 設定マスタ!A2:A</div>
+          `
+        }
+      },
+      {
+        title: "5. 会費入金を入力規則にする",
+        sub: "済・未・不要を選択式に",
+        tab: "会員入力用",
+        hot: ["menu:データ", "cell:F2", "col:F"],
+        dropdown: "data",
+        cell: "F2",
+        formula: "範囲に適用: F2:F / 候補: 設定マスタ!B2:B",
+        summary: "会費入金列も、設定マスタから選べるようにします。",
+        guide: {
+          title: "設定内容",
+          body: `
+            <ol>
+              <li>F列の会費入金を選択</li>
+              <li>データ → データの入力規則</li>
+              <li>候補範囲に <code>設定マスタ!B2:B</code> を指定</li>
+            </ol>
+            <div class="code">範囲に適用: F2:F
+候補範囲: 設定マスタ!B2:B</div>
+          `
+        }
+      },
+      {
+        title: "6. メール対応列を入力規則にする",
+        sub: "告知や督促を選択式に",
+        tab: "会員入力用",
+        hot: ["menu:データ", "cell:G2", "cell:H2", "cell:I2"],
+        dropdown: "data",
+        cell: "G2:I2",
+        formula: "範囲に適用: G2:I / 候補: 設定マスタ!C2:C",
+        summary: "口座メール済、督促、8月告知などを同じ候補で管理します。",
+        guide: {
+          title: "まとめて設定",
+          body: `
+            <ol>
+              <li>G2:I のようにメール対応列を選択</li>
+              <li>データ → データの入力規則</li>
+              <li>候補範囲に <code>設定マスタ!C2:C</code> を指定</li>
+            </ol>
+            <div class="callout">列ごとに同じ候補を使うと、後で集計しやすくなります。</div>
+          `
+        }
+      },
+      {
+        title: "7. 条件付き書式で色をつける",
+        sub: "済は青、未は赤",
+        tab: "会員入力用",
+        hot: ["menu:表示", "cell:F2", "cell:F3", "cell:I3"],
+        cell: "F2:I",
+        formula: "表示形式 → 条件付き書式 / テキストが完全一致: 済、未、不要",
+        summary: "状態ごとに色をつけ、ひと目でわかるようにします。",
+        guide: {
+          title: "色分けルール",
+          body: `
+            <ul>
+              <li>済: 青</li>
+              <li>未: 赤</li>
+              <li>不要: 緑</li>
+              <li>送信予定: 紫</li>
+            </ul>
+            <div class="code">範囲: F2:I
+条件: テキストが完全一致
+値: 済
+色: 青</div>
+          `
+        }
+      },
+      {
+        title: "8. 会員種別別タブに式を入れる",
+        sub: "入力用タブから自動表示",
+        tab: "会員種別別",
+        hot: ["cell:A1", "tab:会員種別別"],
+        cell: "A1",
+        formula: "=SORT(FILTER({'会員入力用'!B2:B,'会員入力用'!C2:C,'会員入力用'!D2:D},LEN('会員入力用'!C2:C)),1,TRUE,3,TRUE)",
+        summary: "会員入力用から、会員種別・名前・フリガナだけを自動表示します。",
+        guide: {
+          title: "A1に入れる式",
+          body: `
+            <p>会員種別別タブのA1に貼ります。</p>
+            <div class="copyRow">
+              <textarea readonly>=SORT(FILTER({'会員入力用'!B2:B,'会員入力用'!C2:C,'会員入力用'!D2:D},LEN('会員入力用'!C2:C)),1,TRUE,3,TRUE)</textarea>
+              <button class="btn primary" data-copy="=SORT(FILTER({'会員入力用'!B2:B,'会員入力用'!C2:C,'会員入力用'!D2:D},LEN('会員入力用'!C2:C)),1,TRUE,3,TRUE)" type="button">式をコピー</button>
+            </div>
+            <div class="callout">FILTERで名前がある行だけ抜き、SORTで並べます。</div>
+          `
+        }
+      },
+      {
+        title: "9. 人数集計の式を入れる",
+        sub: "COUNTIFで種別ごとに数える",
+        tab: "会員種別別",
+        hot: ["cell:A6", "cell:B7", "cell:C7"],
+        cell: "B7",
+        formula: "=COUNTIF('会員入力用'!B:B,A7)",
+        summary: "種別名ごとに何人いるかを数えます。",
+        guide: {
+          title: "基本の人数式",
+          body: `
+            <p>A列に種別名、B列に人数を出す想定です。</p>
+            <div class="copyRow">
+              <textarea readonly>=COUNTIF('会員入力用'!B:B,A7)</textarea>
+              <button class="btn primary" data-copy="=COUNTIF('会員入力用'!B:B,A7)" type="button">人数式をコピー</button>
+            </div>
+            <div class="code">COUNTIF = 指定した条件に合うセルの数を数える</div>
+          `
+        }
+      },
+      {
+        title: "10. 連絡管理タブに式を入れる",
+        sub: "必要な列だけを抜き出す",
+        tab: "連絡管理",
+        hot: ["cell:A1", "tab:連絡管理"],
+        cell: "A1",
+        formula: "={\"会員種別\",\"お名前\",\"メールアドレス\",\"8月告知\"; FILTER({'会員入力用'!B2:B,'会員入力用'!C2:C,'会員入力用'!E2:E,'会員入力用'!I2:I},LEN('会員入力用'!C2:C))}",
+        summary: "メール作業に必要な列だけ、別タブに表示します。",
+        guide: {
+          title: "A1に入れる式",
+          body: `
+            <div class="copyRow">
+              <textarea readonly>={"会員種別","お名前","メールアドレス","8月告知"; FILTER({'会員入力用'!B2:B,'会員入力用'!C2:C,'会員入力用'!E2:E,'会員入力用'!I2:I},LEN('会員入力用'!C2:C))}</textarea>
+              <button class="btn primary" data-copy='={"会員種別","お名前","メールアドレス","8月告知"; FILTER({'\''会員入力用'\''!B2:B,'\''会員入力用'\''!C2:C,'\''会員入力用'\''!E2:E,'\''会員入力用'\''!I2:I},LEN('\''会員入力用'\''!C2:C))}'>式をコピー</button>
+            </div>
+            <div class="callout">表示用タブには直接入力せず、式で表示するのがコツです。</div>
+          `
+        }
+      },
+      {
+        title: "11. 固定で名前を残す",
+        sub: "表示 → 固定 → 4列",
+        tab: "会員入力用",
+        hot: ["menu:固定", "col:A", "col:B", "col:C", "col:D"],
+        dropdown: "freeze",
+        cell: "A:D",
+        formula: "表示 → 固定 → 4列",
+        summary: "右へスクロールしても、名前とフリガナを見失わないようにします。",
+        guide: {
+          title: "クリックする場所",
+          body: `
+            <ol>
+              <li>上メニューの「表示」または「固定」を開く</li>
+              <li>固定から「4列」を選ぶ</li>
+              <li>右にスクロールしてもAからD列が残るか確認</li>
+            </ol>
+            <div class="callout">名簿作業では、名前列の固定が入力ミス防止に効きます。</div>
+          `
+        }
+      },
+      {
+        title: "12. #REF!が出た時の見方",
+        sub: "式が広がる先を空ける",
+        tab: "連絡管理",
+        hot: ["cell:A1", "cell:B1"],
+        cell: "A1",
+        formula: "#REF! = 展開先に文字がある",
+        summary: "式は右や下へ広がります。広がる先に文字があると止まります。",
+        guide: {
+          title: "直し方",
+          body: `
+            <ol>
+              <li>式を入れたセルの右側や下側を見る</li>
+              <li>邪魔している文字や空白文字を消す</li>
+              <li>もう一度式が展開されるか確認する</li>
+            </ol>
+            <div class="callout">表示用タブには直接入力しない、が一番の予防策です。</div>
+          `
+        }
+      }
+    ];
+
+    const inputRows = [
+      ["受付日", "会員種別", "お名前", "フリガナ", "メールアドレス", "会費入金", "口座メール済", "督促", "8月告知"],
+      ["2026/08/01", "正会員", "サンプル 太郎", "サンプル タロウ", "sample@example.com", "済", "済", "不要", "済"],
+      ["2026/08/02", "オンライン, 正会員", "見本 花子", "ミホン ハナコ", "mihon@example.com", "未", "未", "送信予定", "未"],
+      ["2026/08/03", "随時（ビジター）", "練習 一郎", "レンシュウ イチロウ", "lesson@example.com", "不要", "不要", "不要", "送信予定"]
+    ];
+
+    const masterRows = [
+      ["会員種別", "会費入金", "メール対応"],
+      ["正会員", "済", "済"],
+      ["オンライン, 正会員", "未", "未"],
+      ["随時（ビジター）", "不要", "不要"],
+      ["お試し, 随時（ビジター）", "確認中", "失敗"],
+      ["理事", "", "送信予定"],
+      ["評議員", "", "再送予定"],
+      ["賛助会員", "", ""]
+    ];
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function chip(value) {
+      const map = { "済": "blue", "未": "red", "不要": "green", "確認中": "yellow", "送信予定": "purple", "再送予定": "purple", "失敗": "red" };
+      if (!map[value]) return escapeHtml(value);
+      return `<span class="chip ${map[value]}">${escapeHtml(value)}</span>`;
+    }
+
+    function dataFor(tab) {
+      if (tab === "設定マスタ") return masterRows;
+      if (tab === "会員種別別") {
+        return [
+          ["役職・固定枠", "", ""],
+          ["会員種別", "お名前", "フリガナ"],
+          ["理事", "役職 サンプル", ""],
+          ["会員さん集計", "", ""],
+          ["会員種別", "人数", "合計"],
+          ["正会員", "1", "3"],
+          ["オンライン, 正会員", "1", ""],
+          ["随時（ビジター）", "1", ""],
+          ["会員さん一覧", "", ""],
+          ["会員種別", "お名前", "フリガナ"],
+          ...inputRows.slice(1).map(row => [row[1], row[2], row[3]])
+        ];
+      }
+      if (tab === "連絡管理") {
+        return [
+          ["会員種別", "お名前", "メールアドレス", "8月告知"],
+          ...inputRows.slice(1).map(row => [row[1], row[2], row[4], row[8]])
+        ];
+      }
+      if (tab === "未納者確認") {
+        return [
+          ["会員種別", "お名前", "会費入金", "督促"],
+          inputRows[2] ? [inputRows[2][1], inputRows[2][2], inputRows[2][5], inputRows[2][7]] : []
+        ];
+      }
+      return inputRows;
+    }
+
+    function isHot(token) {
+      return recipes[activeRecipe].hot?.includes(token);
+    }
+
+    function renderRecipes() {
+      document.querySelector("#recipeList").innerHTML = recipes.map((recipe, index) => `
+        <button class="recipeButton ${index === activeRecipe ? "isActive" : ""}" type="button" data-recipe="${index}">
+          <span class="recipeNo">${index + 1}</span>
+          <span>
+            <span class="recipeTitle">${escapeHtml(recipe.title)}</span>
+            <span class="recipeSub">${escapeHtml(recipe.sub)}</span>
+          </span>
+        </button>
+      `).join("");
+      document.querySelectorAll("[data-recipe]").forEach(button => {
+        button.addEventListener("click", () => {
+          activeRecipe = Number(button.dataset.recipe);
+          activeTab = recipes[activeRecipe].tab;
+          render();
+        });
+      });
+    }
+
+    function renderMenus() {
+      document.querySelectorAll(".menuBtn").forEach(button => {
+        const menu = button.dataset.menu;
+        button.classList.toggle("isHot", isHot(`menu:${menu}`));
+      });
+      document.querySelector("#dataDropdown").classList.toggle("isOpen", recipes[activeRecipe].dropdown === "data");
+      document.querySelector("#freezeDropdown").classList.toggle("isOpen", recipes[activeRecipe].dropdown === "freeze");
+    }
+
+    function renderTabs() {
+      document.querySelector("#tabs").innerHTML = tabs.map(tab => `
+        <button class="tab ${tab === activeTab ? "active" : ""} ${isHot(`tab:${tab}`) ? "isHot" : ""}" type="button" data-tab="${escapeHtml(tab)}">${escapeHtml(tab)}</button>
+      `).join("");
+      document.querySelectorAll("[data-tab]").forEach(button => {
+        button.addEventListener("click", () => {
+          activeTab = button.dataset.tab;
+          render();
+        });
+      });
+    }
+
+    function renderSheet() {
+      const rows = dataFor(activeTab);
+      const maxCols = Math.max(9, ...rows.map(row => row.length));
+      const bodyRows = Array.from({ length: Math.max(13, rows.length) }, (_, index) => rows[index] || []);
+      const colHeads = Array.from({ length: maxCols }, (_, index) => letters[index] || String(index + 1));
+      document.querySelector("#sheet").innerHTML = `
+        <thead>
+          <tr>
+            <th class="corner"></th>
+            ${colHeads.map(letter => `<th class="colHead ${isHot(`col:${letter}`) ? "isHot" : ""}">${escapeHtml(letter)}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${bodyRows.map((row, rowIndex) => `
+            <tr>
+              <th class="rowHead">${rowIndex + 1}</th>
+              ${colHeads.map((letter, colIndex) => {
+                const value = row[colIndex] || "";
+                const cellName = `${letter}${rowIndex + 1}`;
+                const isHeader = rowIndex === 0 || /固定枠|集計|一覧/.test(row[0] || "");
+                const cls = [
+                  "cell",
+                  isHot(`cell:${cellName}`) || isHot(`row:${rowIndex + 1}`) ? "isHot" : "",
+                  activeTab === "設定マスタ" && rowIndex === 0 ? "masterHead" : isHeader ? "headerCell" : "",
+                  activeTab === "会員種別別" && [1, 4, 9].includes(rowIndex) ? "resultHead" : ""
+                ].join(" ");
+                const header = rows[0]?.[colIndex];
+                const content = ["会費入金", "口座メール済", "督促", "8月告知"].includes(header) && rowIndex > 0 ? chip(value) : escapeHtml(value);
+                return `<td class="${cls}">${content}</td>`;
+              }).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+    }
+
+    function renderGuide() {
+      const recipe = recipes[activeRecipe];
+      document.querySelector("#title").textContent = recipe.title;
+      document.querySelector("#summary").textContent = recipe.summary;
+      document.querySelector("#cellName").textContent = recipe.cell;
+      document.querySelector("#formulaBox").textContent = recipe.formula;
+      document.querySelector("#formulaBox").classList.toggle("isHot", Boolean(recipe.formula));
+      document.querySelector("#guideTitle").textContent = recipe.guide.title;
+      document.querySelector("#guideBody").innerHTML = recipe.guide.body;
+      document.querySelector("#prev").disabled = activeRecipe === 0;
+      document.querySelector("#next").textContent = activeRecipe === recipes.length - 1 ? "最初へ" : "次へ";
+
+      document.querySelectorAll("[data-copy]").forEach(button => {
+        button.addEventListener("click", async () => {
+          const value = button.dataset.copy || "";
+          try {
+            await navigator.clipboard.writeText(value);
+            showToast("コピーしました");
+          } catch (error) {
+            showToast("コピーできない時は、上の欄を選択してコピーしてください");
+          }
+        });
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.querySelector("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function render() {
+      renderRecipes();
+      renderMenus();
+      renderTabs();
+      renderSheet();
+      renderGuide();
+    }
+
+    document.querySelector("#prev").addEventListener("click", () => {
+      activeRecipe = Math.max(0, activeRecipe - 1);
+      activeTab = recipes[activeRecipe].tab;
+      render();
+    });
+
+    document.querySelector("#next").addEventListener("click", () => {
+      activeRecipe = activeRecipe === recipes.length - 1 ? 0 : activeRecipe + 1;
+      activeTab = recipes[activeRecipe].tab;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
