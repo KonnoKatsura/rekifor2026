@@ -183,6 +183,18 @@ textarea {
   text-align: right;
 }
 
+.notice-flyer {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 24px auto 0;
+}
+
+.notice-flyer img {
+  width: 100%;
+  height: auto;
+}
+
 .notice-archive {
   margin-top: 22px;
   padding-top: 18px;
