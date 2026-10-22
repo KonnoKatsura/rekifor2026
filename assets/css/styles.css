@@ -195,6 +195,38 @@ textarea {
   height: auto;
 }
 
+.notice-flyer-caption {
+  display: block;
+  padding: 8px 0;
+  text-align: center;
+}
+
+.notice-document {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 12px 18px;
+  border: 1px solid var(--accent-dark);
+  border-radius: 6px;
+  background: var(--accent-dark);
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.notice-document:hover {
+  background: var(--accent);
+}
+
+.notice-document:focus-visible,
+.notice-flyer:focus-visible {
+  outline: 3px solid var(--accent-dark);
+  outline-offset: 4px;
+}
+
 .notice-archive {
   margin-top: 22px;
   padding-top: 18px;
